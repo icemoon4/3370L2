@@ -10,16 +10,114 @@ import java.util.ArrayList;
  * COMP 3370
  * Lab Assignment 2
  * 
+ * Rachel Palmer
  */
 
 
 public class LAB2 {
 	
-	//TODO: document this method
+	/**
+	 * Builds a heap based on given array using the pullup method (starting from index 1. Further description below).
+	 * After the heap is built, a while loop will begin to add all numbers in the heap from smallest to largest
+	 * in order to reduce rounding error. int k acts as a faux index count. Since arrays cannot have elements
+	 * removed or added dynamically, any "removed" elements are moved to the end of the array, and k prevents
+	 * the rest of the method from accessing those elements. Inside the loop, the minimum elements to be summed
+	 * will be a[0] and one of a[0]'s children. The smallest child is recorded, and the sum is stored into a[0],
+	 * replacing the original value. The child that was summed swaps positions with the end of the array, and k
+	 * is reduced so that that element will be ignored (as if it were removed). Then, pushdown is called on 
+	 * the index that once had the smallest child. If it is larger than its' children, then it is pushed down
+	 * into the heap. pushdown is also called on a[0] since the summed number may also be bigger than its children.
+	 * After the two pushdown's, the heap's min to max order is restored, and the loop repeats. By the time k=0,
+	 * a[0] will hold the sum of all numbers in the heap.
+	 * 
+	 * @param a		defines the array given; will become a heap
+	 * @return		a[0] which contains the sum of all numbers in the heap
+	 */
 	public static float heapAdd(float[] a) {
-		//TODO: implement this method
+		//build heap
+		for(int x = 1; x<=a.length-1; x++){ 
+			pullup(a, x);
+		}
 		
-		return -1;
+		//add heap
+		int k = a.length - 1; //k represents the max index and wont allow the program to access indices larger than it as the array "shrinks"
+		while(k > 0){ 
+			int minChild = 0;
+			if(2 <= k){ //if k is 1, then lchild is the only one left
+				if(a[1] < a[2])
+					minChild = 1;
+				else
+					minChild = 2;
+				}
+			else{
+				minChild = 1;
+			}
+			a[0] = a[0] + a[minChild];
+			float temp = a[minChild];
+			a[minChild] = a[k];
+			a[k] = temp; //switched values to get rid of old value that was summed
+			k--;
+			pushdown(a, minChild, k);
+			pushdown(a, 0, k);
+		}
+		return a[0]; 
+	}
+	
+	/**
+	 * Takes the array/heap and a given index, and pulls the element a node above, if it is smaller than its
+	 * parent. If the parent and child are switched, then pullup is called recursively on parent index, since it
+	 * now contains a new number. It only calls pullup again if the index is not 0, since index 0 cannot be
+	 * pulled up any further.
+	 * @param a		array/heap to be sorted
+	 * @param i		index of array element to check for possible pullup
+	 * @return		the array with element in index i in the correct location
+	 */
+	public static float[] pullup(float[] a, int i){
+		int parenti = (i-1)/2;
+		if(a[i] < a[parenti]){ 
+			float temp = a[parenti];
+			a[parenti] = a[i]; 
+			a[i] = temp; 
+			if(parenti != 0)
+				pullup(a, parenti);
+		}
+		return a;
+	}
+	
+	/**
+	 * Takes the array/heap at the given index, and pushes the element a node below, if it is larger than its
+	 * smallest child. If the parent and child are switched, then pushdown is called on the index that once had
+	 * the smallest value in it (and now contains the larger value). This way, it can be pushed down further if
+	 * it continues to be larger than the children. k checks to make sure that pushdown will not try to add values
+	 * into indices that don't exist.
+	 * @param a		array/heap to be sorted
+	 * @param i		index of array element to check for possible pushdown
+	 * @param k		represents the faux size of the heap and prevents values from being sorted into ignored or nonexistent indices.
+	 * @return		the array with element in index i in the correct location
+	 */
+	public static float[] pushdown(float[] a, int i, int k){
+		int lchild = 2*i + 1;
+		int rchild = 2*i + 2;
+		int mini = i;
+		if(lchild <= k){
+			if(rchild <= k){ //if the rchild is valid
+				if(a[lchild] <= a[rchild] && a[lchild] < a[mini])
+					mini = lchild;
+				else if(a[rchild] <= a[lchild] && a[rchild] < a[mini])
+					mini = rchild;
+			}
+			else{ //if rchild is not valid
+				if(a[lchild] < a[mini])
+					mini = lchild;
+			}
+			if(mini != i){
+				float temp = a[mini];
+				a[mini] = a[i];
+				a[i] = temp;
+				pushdown(a, mini, k); 
+			}
+		}
+		return a;
 	}
 
 	/********************************************
