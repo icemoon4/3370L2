@@ -60,7 +60,12 @@ public class LAB2 {
 			pushdown(a, minChild, k);
 			pushdown(a, 0, k);
 		}
-		return a[0]; 
+		if(a.length == 0){ //this if statement is only necessary for ChartMaker to run properly
+			return 0;
+		}
+		else{
+			return a[0]; 
+		}
 	}
 	
 	/**
